@@ -9,7 +9,7 @@ lMax = input.lMax;
 minSm = input.minSm;
 lpH = input.lpH;
 similarBnd = input.similarBnd;
-
+fileName = erase(loadFile, '.mat');
 %alpha=0.31736;     
 %minS=59;        
 %R1=0.48180;        
@@ -18,6 +18,7 @@ similarBnd = input.similarBnd;
 %similarBnd =0.1;  
 
 data = load(loadFile);
+data = data.(fileName);
 dataNoTag = data(:,1:end-1);
 dataTag = data(:,end);
 xInput=dataNoTag';
@@ -31,9 +32,9 @@ for i=1:size(xInput,1)
     xl=(xInput(i,:)-ll)/(hl-ll);  
     normalxi=[normalxi;xl];
 end
-[m_data] = size(normalxi,2);
-dataNorm=normalxi; 
 
+m_data = size(normalxi,2);
+dataNorm=normalxi; 
 Centers(:,1)=dataNorm(:,1);                              
 Nj=1;
 Ni=size(dataNorm,1);                                    
@@ -138,9 +139,10 @@ end
 
 
                              
-%c=colormap(lines(cluster_size));     
+  
+c=colormap(lines(cluster_size)); 
 cluster_cell(cellfun(@isempty, cluster_cell))=[];
-tic
+
 cellsize=size(cluster_cell,1);
 Sm = zeros(cellsize,1);
 for cluster_num = 1:cellsize
@@ -157,11 +159,9 @@ end
 cluster_cell(cellfun(@isempty, cluster_cell))=[];     
 Sm(all(Sm==0,2),:)=[];  
 clusterA= cell2mat(cluster_cell');                       
-try
-find(ismember(dataNorm',clusterA','rows'));
-catch
-    addcs2
-end
+
+% find(ismember(dataNorm',clusterA','rows'));
+
 dataNorm=dataNorm';
 dataNorm(ismember(dataNorm,clusterA','rows'),:) = [];         
 
@@ -170,21 +170,19 @@ Centers(all(Centers==0,2),:)=[];
 normalxi=normalxi';
 for j=1:size(Centers,1)                           
     i =0;
-    c = 10;
-    b = [];
+    %c = 10;
+    %b = [];
 for k = 1:50
-    t = linspace(0,2*pi);
+    %t = linspace(0,2*pi);
     ax=Centers(j,1);
     by=Centers(j,2);    
     if ax==0&&by==0
        break
     end   
-    index =  j;
-try
+    %index =  j;
+
     step = exp(Sm(j))/10;  
-    catch
-        addcs2
-end
+
   
     r = hypot(normalxi(:,1)-ax,normalxi(:,2)-by);                              
     T=find(r<=(R1));                           
@@ -241,9 +239,9 @@ for  i=1:n
     end   
 end  
 for i = 1:n
-    SmLi = SmL(i,:);
+    %SmLi = SmL(i,:);
     mini = min(SmL);
-    [minnum index] = find(SmL==mini);    
+    [~, index] = find(SmL==mini);    
     dos = index(i,1);                    
    SmL(dos,dos) = inf;                                            
 end
@@ -262,13 +260,13 @@ for i = 1:m_data
     mini1 = min(Disti);                                           
     [minnum index] = find(Disti==mini1);           
     pos = index(1,1);         
-    minL1 = minnum(1,1);      
+    %minL1 = minnum(1,1);      
     X = index(1,1);
     Disti(1,pos) = inf;                
     mini2 = min(Disti);                
     [minnum index] = find(Disti==mini2);   
-    pos = index(1,1);
-    minL2 = minnum(1,1);
+    %pos = index(1,1);
+    %minL2 = minnum(1,1);
     Y = index(1,1);
     if  mini2>1.5*dc
         LXY2 = 0;
@@ -304,13 +302,13 @@ end
 Lii=[];
 for i = 1:cellsize
     Li = L(i,:);
-    [num indexLi] = find(Li>=lMax);
+    [~, indexLi] = find(Li>=lMax);
     Li(Li<lMax) = 0;
     Li(Li>=lMax) = indexLi;
     Lii = [Lii;Li];
     Lii(i,i)=i;
 end  
-SmLii=[];
+%SmLii=[];
 for i = 1:cellsize
    SmLi = SmL(i,:);
    for j=1:cellsize
@@ -358,26 +356,28 @@ end
 [m_C3,L_C3] = size(normalxi);
 C4 = sortrows(normalxi,L_C3);
 
-C5 = sortrows(normalxi,L_C3-2);  %? not use;
+%C5 = sortrows(normalxi,L_C3-2);  %? not use;
 class = C4(:,end);
 c = max(class);
 x1 = C4(:,1:end-2);
 x1=[x1 class];
 cmap=colormap; 
  
+hold on
 for i=1:m_C3
     if x1(i,3)~=-1
    ic=int8((x1(i,3)*100.)/(c*10));
 
     plot(x1(i,1),x1(i,2),'o','MarkerSize',5,'MarkerFaceColor',cmap(ic,:),'MarkerEdgeColor',cmap(ic,:));   
-    hold on;
+
     end
     if x1(i,3)==-1
         plot(x1(i,1),x1(i,2),'o','MarkerSize',5,'MarkerFaceColor','k','MarkerEdgeColor','k');
-         hold on;
+      
     end
 end
-toc
+hold off
+
   [FMeasure2,Accuracy2] = Fmeasure(dataTag,normalxi(:,end))  
 
   
